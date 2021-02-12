@@ -1,0 +1,22 @@
+#settingsMenu{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 10px 0 0;
+}
+body{
+    width: 100%;
+}
+h1{
+    text-align: center;
+}
+#saveButton{
+    margin-top: 10px;
+}
+.pane{
+
+}
+.item{
+}
+.hidden{
+    visibility: hidden;
+}

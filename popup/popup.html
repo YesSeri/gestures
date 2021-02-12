@@ -6,12 +6,80 @@
 
 <body>
   <h1>Gesturing Mouse</h1>
-  <p>Up: <select id="up-dropdown"></select></p>
-  <p>Down: <select id="up-dropdown"></select></p>
-  <p>Left: <select id="up-dropdown"></select></p>
-  <p>Right: <select id="up-dropdown"></select></p>
-  <p>Down-Right: <select id="up-dropdown"></select></p>
-  <script type="module" src="configLocal.js"></script>
+  <div id="settingsMenu">
+    <div id="leftPane" class="pane">
+      <div id="up" class="item">
+        <p>Up</p>
+        <select id="up-dropdown">
+          <option value="back">back</option>
+          <option value="bookmark">bookmark</option>
+          <option value="close">close</option>
+          <option value="create">create</option>
+          <option value="duplicate">duplicate</option>
+          <option value="forward">forward</option>
+          <option value="prevTab">prevTab</option>
+          <option value="nextTab">nextTab</option>
+          <option value="none">none</option>
+          <option value="reload">reload</option>
+        </select>
+      </div>
+      <div id="down" class="item">
+        <p>Down</p>
+        <select id="down-dropdown">
+          <option value="back">back</option>
+          <option value="bookmark">bookmark</option>
+          <option value="close">close</option>
+          <option value="create">create</option>
+          <option value="duplicate">duplicate</option>
+          <option value="forward">forward</option>
+          <option value="prevTab">prevTab</option>
+          <option value="nextTab">nextTab</option>
+          <option value="none">none</option>
+          <option value="reload">reload</option>
+        </select>
+      </div>
+    </div>
+    <div id="rightPane" class="pane">
+      <div id="downleft" class="item">
+        <p>Down-Left</p>
+        <select id="downleft-dropdown">
+          <option value="back">back</option>
+          <option value="bookmark">bookmark</option>
+          <option value="close">close</option>
+          <option value="create">create</option>
+          <option value="duplicate">duplicate</option>
+          <option value="forward">forward</option>
+          <option value="prevTab">prevTab</option>
+          <option value="nextTab">nextTab</option>
+          <option value="none">none</option>
+          <option value="reload">reload</option>
+        </select>
+      </div>
+      <div id="downright" class="item">
+        <p>Down-Right</p>
+        <select id="downright-dropdown">
+          <option value="back">back</option>
+          <option value="bookmark">bookmark</option>
+          <option value="close">close</option>
+          <option value="create">create</option>
+          <option value="duplicate">duplicate</option>
+          <option value="forward">forward</option>
+          <option value="prevTab">prevTab</option>
+          <option value="nextTab">nextTab</option>
+          <option value="none">none</option>
+          <option value="reload">reload</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+  <button id="saveButton">Save</button>
+  <button id="setDefault">Restore Defaults</button>
+  <p class="hidden">Saved</p>
+  </div>
+
+  <!-- <p>Down-Right: <select id="up-dropdown"></select></p> -->
+  <script src="scripts.js"></script>
 </body>
 
 </html>

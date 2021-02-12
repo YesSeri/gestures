@@ -49,7 +49,7 @@ document.addEventListener("mouseup", (e) => {
     const t1 = performance.now();
     const time = t1 - t0;
     document.oncontextmenu = function (e) {
-      if (time > 140) {
+      if (time > 110) {
         stopEvent(e)
         isPressed = false;
         for (let i = 0; i < pointArray.length - 1; i++) {
@@ -151,7 +151,7 @@ function sendMove(dirs) {
 }
 document.addEventListener('keydown', e => {
   if (e.key === "z") {
-    sendMove(["none", "none"])
+    sendMove(["down", "left"])
   }
   if (e.key === "x") {
     sendMove(["right", "none"])

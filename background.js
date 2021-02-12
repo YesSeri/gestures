@@ -2,6 +2,9 @@
 
 // (function () {
 
+// Names of the commands. Used like an enum, so I don't mispell things.
+
+
 const COMMANDS = {
   BACK: "back",
   BOOKMARK: "bookmark",
@@ -9,183 +12,176 @@ const COMMANDS = {
   CREATE: "create",
   DUPLICATE: "duplicate",
   FORWARD: "forward",
+  PREVTAB: "prevTab",
   NEXTTAB: "nextTab",
   NONE: "none",
   RELOAD: "reload",
 };
-
-
-const storage = {
-  activeConfig: {
-  },
-  defaultConfig: {
-    up: COMMANDS.CREATE,
-    down: COMMANDS.CLOSE,
-    left: COMMANDS.BACK,
-    right: COMMANDS.FORWARD,
-    downleft: COMMANDS.DUPLICATE,
-    downright: COMMANDS.NEXTTAB,
-    upright: COMMANDS.NONE,
-    upright: COMMANDS.NONE,
-    rightup: COMMANDS.NONE,
-    rightdown: COMMANDS.NONE,
-    leftup: COMMANDS.NONE,
-    leftdown: COMMANDS.NONE,
-  },
-  get: function (key) {
-    chrome.storage.sync.get(key, function (items) {
-    });
-  },
-  getAll: function () {
-    chrome.storage.sync.get(null, function (items) {
-      console.log(items)
-    });
-  },
-  getConfig: function (cfg) {
-    chrome.storage.sync.get(null, function (items) {
-      storage.activeConfig = items;
-    });
-  },
-  set: (obj) => chrome.storage.sync.set(obj),
-  isConfigInit: () => {
-    chrome.storage.sync.get(null, function (items) {
-      const allKeys = Object.keys(items);
-      if (allKeys.length === 0) {
-        storage.setDefaults()
-        console.log("settingdefault");
-      } else {
-        setDropdown()
-      }
-    });
-  },
-  setDefaults: () => {
-    storage.set(storage.defaultConfig)
-    storage.activeConfig = storage.defaultConfig
-  },
-  clear: () => {
-    chrome.storage.sync.clear(() => {
-      console.log("Storage has been cleared");
-    })
-  },
-}
-storage.getConfig();
-console.log("config", storage.activeConfig);
-
+// Gives a message on installing or updating
 chrome.runtime.onInstalled.addListener(function (details) {
-  console.log(details)
   if (details.reason == "install") {
-    storage.isConfigInit();
+    const thisVersion = chrome.runtime.getManifest().version;
+    console.log("Installed " + thisVersion + "!");
   } else if (details.reason == "update") {
     const thisVersion = chrome.runtime.getManifest().version;
     console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
   }
 });
 
-let activeTab;
-let tabsCurrentWindow;
-let bookmarkBar;
 
-chrome.bookmarks.getTree(function (bookmarks) {
-  bookmarkBar = findBookmark(bookmarks);
-});
 
-function findBookmark(bookmarks) {
-  for (bookmark of bookmarks) {
-    if (bookmark.title === "Bookmarks bar") {
-      return bookmark;
-    }
-    else if (bookmark.children) {
-      return findBookmark(bookmark.children);
-    }
-  }
-}
-
-const commandFunctions = {
-  bookmark: () => {
-    chrome.bookmarks.create({ parentId: bookmarkBar.id, title: activeTab.title, url: activeTab.url }, () => {
-    })
+const storage = {
+  defaultConfig: {
+    up: COMMANDS.CREATE,
+    down: COMMANDS.CLOSE,
+    left: COMMANDS.BACK,
+    right: COMMANDS.FORWARD,
+    downleft: COMMANDS.PREVTAB,
+    downright: COMMANDS.NEXTTAB,
+    upleft: COMMANDS.NONE,
+    upright: COMMANDS.NONE,
+    rightup: COMMANDS.NONE,
+    rightdown: COMMANDS.NONE,
+    leftup: COMMANDS.NONE,
+    leftdown: COMMANDS.NONE,
   },
-  close: () => {
-    if (activeTab.id) {
-      chrome.tabs.remove(activeTab.id);
+  // clear: () => {
+  //   chrome.storage.sync.clear(() => {
+  //     console.log("Storage has been cleared");
+  //   })
+  // },
+}
+function initSettings() {
+  chrome.storage.sync.get(null, function (config) {
+    if (Object.keys(config).length < 3) {
+      chrome.storage.sync.set(storage.defaultConfig)
+      initMain(storage.defaultConfig)
     } else {
-      throw new Error("activeTabId has invalid value")
+      initMain(config)
     }
-  },
-  create: () => {
-    chrome.tabs.create();
-  },
-  duplicate: () => {
-    chrome.tabs.duplicate(activeTab.id, () => { })
-  },
-  back: () => {
-    chrome.tabs.goBack(activeTab.id, () => {
-    })
-  },
-  forward: () => {
-    chrome.tabs.goForward(activeTab.id, () => {
-    })
-  },
-  prevTab: () => {
-  },
-  nextTab: () => {
-  },
-  none:()=> {
-    console.log("nothing programmed for this direction")
-  },
-  reload: () => {
-    chrome.tabs.reload(activeTab.id, () => {
-    })
-  }
+  })
 }
+initSettings();
 
-function setCurrentTabUrl(callback) {
-  var queryInfo = {
-    active: true,
-    currentWindow: true
-  };
-  chrome.tabs.query(queryInfo, function (tabs) {
-    activeTab = tabs[0];
-    console.log(activeTab)
+function initMain(activeConfig) {
+
+  let activeTab;
+  let bookmarkBar;
+  chrome.bookmarks.getTree(function (bookmarks) {
+    bookmarkBar = findBookmarkBar(bookmarks);
   });
-}
 
-chrome.tabs.onActivated.addListener((activeInfo) => {
-  setCurrentTabUrl()
-});
-chrome.tabs.onUpdated.addListener(function (activeInfo) {
-  setCurrentTabUrl();
-});
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if(request === "getConfig") {
-    sendResponse(storage.activeConfig)
+  function findBookmarkBar(bookmarks) {
+    for (bookmark of bookmarks) {
+      if (bookmark.title === "Bookmarks bar") {
+        return bookmark;
+      }
+      else if (bookmark.children) {
+        return findBookmarkBar(bookmark.children);
+      }
+    }
   }
-})
 
-chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
+  const commandFunctions = {
+    bookmark: () => {
+      chrome.bookmarks.create({ parentId: bookmarkBar.id, title: activeTab.title, url: activeTab.url }, () => {
+      })
+    },
+    close: () => {
+      if (activeTab.id) {
+        chrome.tabs.remove(activeTab.id);
+      } else {
+        throw new Error("activeTabId has invalid value")
+      }
+    },
+    create: () => {
+      chrome.tabs.create({ active: true }, () => { console.log("Created Tab") });
+    },
+    duplicate: () => {
+      chrome.tabs.duplicate(activeTab.id, () => { console.log("Tab has been duplicated. "); })
+    },
+    back: () => {
+      chrome.tabs.goBack(activeTab.id, () => {
+      })
+    },
+    forward: () => {
+      chrome.tabs.goForward(activeTab.id, () => {
+      })
+    },
+    prevTab: async () => {
+      const tabs = await getCurrentTabs()
+      for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].id === activeTab.id) {
+          const prevTab = i === 0 ? tabs.pop() : tabs[i - 1];
+          console.log("prev tab", prevTab)
+          chrome.tabs.update(prevTab.id, { active: true, highlighted: true });
+        }
+      }
+    },
+    nextTab: async () => {
+      const tabs = await getCurrentTabs()
+      for (let i = 0; i < tabs.length; i++) {
+        if (tabs[i].id === activeTab.id) {
+          const nextTab = i === tabs.length ? tabs.shift() : tabs[i + 1];
+          console.log("Next tab", nextTab)
+          chrome.tabs.update(nextTab.id, { active: true, highlighted: true });
+        }
+      }
+    },
+    none: () => {
+      console.log("Nothing programmed for this direction")
+    },
+    reload: () => {
+      chrome.tabs.reload(activeTab.id, () => {
+        console.log("Page refreshed!")
+      })
+    }
+  }
+
+  function getActiveTab() {
+    return new Promise(resolve => {
+      const queryInfo = {
+        active: true,
+        currentWindow: true
+      };
+      chrome.tabs.query(queryInfo, (tabs) => {
+        resolve(tabs[0])
+      });
+    })
+
+  }
+  function getCurrentTabs() {
+    return new Promise(resolve => {
+      const queryInfo = {
+        currentWindow: true
+      };
+      chrome.tabs.query(queryInfo, (tabs) => {
+        resolve(tabs)
+      });
+    })
+  }
+
+  chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    activeTab = await getActiveTab()
+  });
+  // chrome.tabs.onUpdated.addListener(function (activeInfo) {
+  // });
+
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const { dirs } = request
     const fn = findDirFunctionInConfig(dirs)
     fn();
   });
-// const setTabsCurrentWindow = async () => {
-//   chrome.tabs.query({ currentWindow: true }, function (tabs) {
-//     tabsCurrentWindow = tabs.map(function (tab) {
-//       return tab;
-//     });
-//   });
-// }
-function findDirFunctionInConfig(dirs) {
-  let configValue;
-  console.log("active", storage.activeConfig);
-  if (dirs[1] === "none") {
-    configValue = dirs[0]
-  } else {
-    configValue = dirs[0] + dirs[1]
+
+  function findDirFunctionInConfig(dirs) {
+    let configValue;
+    if (dirs[1] === "none") {
+      configValue = dirs[0]
+    } else {
+      configValue = dirs[0] + dirs[1]
+    }
+    const commandName = activeConfig[configValue];
+    const command = commandFunctions[commandName]
+    return command
   }
-  console.log("configValue", configValue);
-  const commandName = storage.activeConfig[configValue];
-  const command = commandFunctions[commandName]
-  return command
 }
