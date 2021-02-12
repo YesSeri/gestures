@@ -1,0 +1,12 @@
+#mouseGestureOverlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    font-size: 40px;
+    background-color: #111;
+    color: #eee;
+    border: solid 2px #eee;
+    
+}

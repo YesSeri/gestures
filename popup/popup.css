@@ -1,16 +1,24 @@
 #settingsMenu{
     display:grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     padding: 0 10px 0 0;
 }
+html{
+    height: 400px;
+    width: 500px;
+}
 body{
-    width: 220px;
+    height: 400px;
+    width: 500px;
 }
 h1{
     text-align: center;
 }
 #saveButton{
     margin-top: 10px;
+}
+#sensDiv{
+    padding: 10px 0px 0px 0px;
 }
 .pane{
 

@@ -18,15 +18,17 @@
     ],
     "background": {
       "service_worker": "background.js"
-
     },
     "content_scripts": [
       {
         "matches": [
           "<all_urls>"
         ],
+        "css": [
+          "content/content.css"
+        ],
         "js": [
-          "content.js"
+          "content/content.js"
         ]
       }
     ]

@@ -10,8 +10,10 @@
 
   async function main() {
     let config = await getConfig();
+    console.log(config);
     setupSelectOptions()
-    setOptionsToCurrentSettings(config)
+    setupSensSlider(config.other.sens)
+    setOptionsToCurrentSettings(config.directions)
     setupButtons()
   }
   function setOptionsToCurrentSettings(config) {
@@ -36,22 +38,34 @@
     }
 
   }
+  function setupSensSlider(sensValue) {
+    console.log(sensValue);
+    const slider = document.querySelector("#sensSlider");
+    console.log(slider);
+    slider.value = sensValue
+  }
   function setupSelectOptions() {
     const optionsDivTemplate = createOptionsDivTemplate();
     const leftPane = document.querySelector("#leftPane")
+    const midLeftPane = document.querySelector("#midLeftPane")
+    const midRightPane = document.querySelector("#midRightPane")
     const rightPane = document.querySelector("#rightPane")
     let i = 0;
-    for (direction in defaultConfig) {
+    for (direction in defaultConfig.directions) {
       const newOptionsDiv = createNewOptionsDiv(optionsDivTemplate, direction)
-      if (i < 8) {
+      if (i < 4) {
         leftPane.appendChild(newOptionsDiv);
-      } else {
+      }
+      else if (i < 8) {
+        midLeftPane.appendChild(newOptionsDiv);
+      }
+      else if (i < 12) {
+        midRightPane.appendChild(newOptionsDiv)
+      }
+      else {
         rightPane.appendChild(newOptionsDiv)
       }
       i++;
-    }
-    for (let i = 0; i < directions.length; i++) {
-
     }
   }
   function createOptionsDivTemplate() {
@@ -86,28 +100,37 @@
     restoreButton.addEventListener("click", restoreDefaults)
   }
   function save() {
-    let newConfig = {};
+    let directions = {};
     const items = document.getElementsByClassName("item");
     for (const item of items) {
       const configPair = getConfigValueFromItem(item);
-      newConfig = { ...newConfig, ...configPair };
+      directions = { ...directions, ...configPair };
     }
-    config = newConfig
-    chrome.storage.sync.set(newConfig, () => {
+    other = {
+      sens: getSensValue(),
+    }
+    config  = {
+      directions, other
+    }
+    chrome.storage.sync.set(config, () => {
       const saveMessage = document.getElementById("saveMessage");
       saveMessage.classList.remove("hidden")
-      setOptionsToCurrentSettings(config)
+      setOptionsToCurrentSettings(config.directions)
       setTimeout(() => {
         saveMessage.classList.add("hidden")
       }, 1000)
     })
+  }
+  function getSensValue() {
+    const slider = document.querySelector("#sensSlider");
+    return slider.value;
   }
   function restoreDefaults() {
     config = defaultConfig
     chrome.storage.sync.set(defaultConfig, () => {
       const saveMessage = document.getElementById("defaultMessage");
       saveMessage.classList.remove("hidden")
-      setOptionsToCurrentSettings(config)
+      setOptionsToCurrentSettings(config.directions)
       setTimeout(() => {
         saveMessage.classList.add("hidden")
       }, 1000)
@@ -137,23 +160,27 @@
   };
 
   defaultConfig = {
-    up: COMMANDS.CREATE,
-    down: COMMANDS.CLOSE,
-    left: COMMANDS.BACK,
-    right: COMMANDS.FORWARD,
-    updown: COMMANDS.FORWARD,
-    downup: COMMANDS.FORWARD,
-    rightleft: COMMANDS.FORWARD,
-    leftright: COMMANDS.FORWARD,
-    downleft: COMMANDS.PREVTAB,
-    downright: COMMANDS.NEXTTAB,
-    upleft: COMMANDS.RELOAD,
-    upright: COMMANDS.NONE,
-    rightup: COMMANDS.NONE,
-    rightdown: COMMANDS.NONE,
-    leftup: COMMANDS.NONE,
-    leftdown: COMMANDS.NONE,
+    directions: {
+      up: COMMANDS.CREATE,
+      down: COMMANDS.CLOSE,
+      left: COMMANDS.BACK,
+      right: COMMANDS.FORWARD,
+      updown: COMMANDS.FORWARD,
+      downup: COMMANDS.FORWARD,
+      rightleft: COMMANDS.FORWARD,
+      leftright: COMMANDS.FORWARD,
+      downleft: COMMANDS.PREVTAB,
+      downright: COMMANDS.NEXTTAB,
+      upleft: COMMANDS.RELOAD,
+      upright: COMMANDS.NONE,
+      rightup: COMMANDS.NONE,
+      rightdown: COMMANDS.NONE,
+      leftup: COMMANDS.NONE,
+      leftdown: COMMANDS.NONE,
+
+    },
+    other: {
+      sens: 110,
+    }
   };
-  // Up is the only one that exists in the beginning
-  const directions = ["down", "left", "right", "updown", "downup", "leftright", "rightleft", "downright", "downleft", "leftdown", "leftup", "rightdown", "rightup", "upright", "upleft"]
 })();

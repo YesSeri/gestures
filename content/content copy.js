@@ -1,11 +1,6 @@
 'use strict';
 // (function () {
 
-const composeKey = "z"
-let isClickedDown
-let isPressed = false;
-let pointArray = [];
-let moveDirArray = []
 
 class Point {
   constructor(x, y) {
@@ -37,48 +32,87 @@ class Point {
   }
 }
 
-let t0;
-document.addEventListener("mousedown", (e) => {
-  if (e.button === 2) {
-    t0 = performance.now();
-    isPressed = true;
-  }
-})
-document.addEventListener("mouseup", (e) => {
-  if (e.button === 2) {
-    const t1 = performance.now();
-    const time = t1 - t0;
-    document.oncontextmenu = function (e) {
-      if (time > 110) {
-        stopEvent(e)
-        isPressed = false;
-        for (let i = 0; i < pointArray.length - 1; i++) {
-          moveDirArray.push(Point.directionMoved(pointArray[i], pointArray[i + 1]))
-        }
-        const moveMade = averageMovement(moveDirArray)
-        sendMove(moveMade)
-        moveDirArray = []
-        pointArray = []
-      };
-    }
-  }
-})
+function init() {
+  addMouseListeners()
+  addOverlay()
+}
+init()
 
-function stopEvent(event) {
-  if (event.preventDefault != undefined)
-    event.preventDefault();
-  if (event.stopPropagation != undefined)
-    event.stopPropagation();
+function addOverlay() {
+  const div = document.createElement("div");
+  div.id = "mouseGestureOverlay"
+  div.style.display = "none"
+  div.innerHTML = "<p>&#10141;</p>"
+  document.body.appendChild(div)
+}
+function showOverlay(){
+  const div = document.getElementById("mouseGestureOverlay")
+  div.style.display = "block"
+  console.log(div);
 }
 
+function hideOverlay(){
+  const div = document.getElementById("mouseGestureOverlay")
+  div.style.display = "none"
+}
+function addMouseListeners() {
+  let t0;
+  let isPressed = false;
+  let pointArray = [];
 
-document.addEventListener('mousemove', e => {
-  if (isPressed === true) {
-    const x = e.pageX;
-    const y = e.pageY;
-    pointArray.push(new Point(x, y))
+  // Notices when mouse is clicked and starts taking time.
+  document.addEventListener("mousedown", (e) => {
+    if (e.button === 2) {
+      t0 = performance.now();
+      isPressed = true;
+      showOverlay();
+    }
+  })
+
+  // When right mouse is released it calculates the average one or two movement directions.
+  document.addEventListener("mouseup", (e) => {
+    if (e.button === 2) {
+      const t1 = performance.now();
+      const time = t1 - t0;
+      isPressed = false;
+      hideOverlay();
+      document.oncontextmenu = function (e) {
+        if (time > 110) {
+          stopEvent(e)
+          calculateDirection(pointArray);
+          pointArray = []
+        };
+      }
+    }
+  })
+
+  // Registers movement
+  document.addEventListener('mousemove', e => {
+    if (isPressed === true) {
+      const x = e.pageX;
+      const y = e.pageY;
+      pointArray.push(new Point(x, y))
+    }
+  });
+
+  // Stops the rightclick menu from showing up when doing mouse gesture
+  function stopEvent(event) {
+    if (event.preventDefault != undefined)
+      event.preventDefault();
+    if (event.stopPropagation != undefined)
+      event.stopPropagation();
   }
-});
+}
+
+function calculateDirection(pointArray) {
+  let moveDirArray = []
+  for (let i = 0; i < pointArray.length - 1; i++) {
+    moveDirArray.push(Point.directionMoved(pointArray[i], pointArray[i + 1]))
+  }
+  const moveMade = averageMovement(moveDirArray)
+  sendMove(moveMade)
+}
+
 
 function averageMovement(arr) {
   arr.slice(2);

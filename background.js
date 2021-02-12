@@ -20,6 +20,7 @@ const COMMANDS = {
 // Gives a message on installing or updating
 chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason == "install") {
+    chrome.storage.sync.set(defaultConfig)
     const thisVersion = chrome.runtime.getManifest().version;
     console.log("Installed " + thisVersion + "!");
   } else if (details.reason == "update") {
@@ -27,40 +28,37 @@ chrome.runtime.onInstalled.addListener(function (details) {
     console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
   }
 });
-
-
-
-const storage = {
-  defaultConfig: {
+defaultConfig = {
+  directions: {
     up: COMMANDS.CREATE,
     down: COMMANDS.CLOSE,
     left: COMMANDS.BACK,
     right: COMMANDS.FORWARD,
+    updown: COMMANDS.FORWARD,
+    downup: COMMANDS.FORWARD,
+    rightleft: COMMANDS.FORWARD,
+    leftright: COMMANDS.FORWARD,
     downleft: COMMANDS.PREVTAB,
     downright: COMMANDS.NEXTTAB,
-    upleft: COMMANDS.NONE,
+    upleft: COMMANDS.RELOAD,
     upright: COMMANDS.NONE,
     rightup: COMMANDS.NONE,
     rightdown: COMMANDS.NONE,
     leftup: COMMANDS.NONE,
     leftdown: COMMANDS.NONE,
+
   },
-  // clear: () => {
-  //   chrome.storage.sync.clear(() => {
-  //     console.log("Storage has been cleared");
-  //   })
-  // },
-}
+  other: {
+    sens: 110,
+  }
+};
+
 function initSettings() {
   chrome.storage.sync.get(null, function (config) {
-    if (Object.keys(config).length < 3) {
-      chrome.storage.sync.set(storage.defaultConfig)
-      initMain(storage.defaultConfig)
-    } else {
-      initMain(config)
-    }
+    initMain(config)
   })
 }
+
 initSettings();
 
 function initMain(activeConfig) {
@@ -180,7 +178,7 @@ function initMain(activeConfig) {
     } else {
       configValue = dirs[0] + dirs[1]
     }
-    const commandName = activeConfig[configValue];
+    const commandName = activeConfig.directions[configValue];
     const command = commandFunctions[commandName]
     return command
   }
