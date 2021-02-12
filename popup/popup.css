@@ -4,7 +4,7 @@
     padding: 0 10px 0 0;
 }
 body{
-    width: 100%;
+    width: 220px;
 }
 h1{
     text-align: center;
@@ -18,5 +18,5 @@ h1{
 .item{
 }
 .hidden{
-    visibility: hidden;
+    display: none;
 }
