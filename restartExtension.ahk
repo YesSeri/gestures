@@ -11,6 +11,8 @@ sleep, 300
 Send {Alt down}{tab}{Alt up}
 sleep, 300
 send, ^{Tab}
+sleep, 300
+Send {CtrlDown}r{Alt up}
 return
 
 f11::

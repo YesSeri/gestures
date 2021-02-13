@@ -48,7 +48,6 @@ function addOverlay() {
 function showOverlay(){
   const div = document.getElementById("mouseGestureOverlay")
   div.style.display = "block"
-  console.log(div);
 }
 
 function hideOverlay(){

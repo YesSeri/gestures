@@ -10,9 +10,7 @@
 
   async function main() {
     let config = await getConfig();
-    console.log(config);
     setupSelectOptions()
-    setupSensSlider(config.other.sens)
     setOptionsToCurrentSettings(config.directions)
     setupButtons()
   }
@@ -37,12 +35,6 @@
       }
     }
 
-  }
-  function setupSensSlider(sensValue) {
-    console.log(sensValue);
-    const slider = document.querySelector("#sensSlider");
-    console.log(slider);
-    slider.value = sensValue
   }
   function setupSelectOptions() {
     const optionsDivTemplate = createOptionsDivTemplate();
@@ -106,35 +98,34 @@
       const configPair = getConfigValueFromItem(item);
       directions = { ...directions, ...configPair };
     }
-    other = {
-      sens: getSensValue(),
+    config = {
+      directions
     }
-    config  = {
-      directions, other
-    }
-    chrome.storage.sync.set(config, () => {
-      const saveMessage = document.getElementById("saveMessage");
-      saveMessage.classList.remove("hidden")
-      setOptionsToCurrentSettings(config.directions)
-      setTimeout(() => {
-        saveMessage.classList.add("hidden")
-      }, 1000)
-    })
+    saveShowMessage("saveMessage", config)
   }
-  function getSensValue() {
-    const slider = document.querySelector("#sensSlider");
-    return slider.value;
-  }
+
   function restoreDefaults() {
     config = defaultConfig
-    chrome.storage.sync.set(defaultConfig, () => {
-      const saveMessage = document.getElementById("defaultMessage");
-      saveMessage.classList.remove("hidden")
+    saveShowMessage("defaultMessage", config)
+  }
+  function saveShowMessage(messageId, config) {
+    chrome.storage.sync.set(config, () => {
+      const message = document.getElementById(messageId);
+      message.classList.remove("hidden")
       setOptionsToCurrentSettings(config.directions)
+      updateContentScriptConfig();
       setTimeout(() => {
-        saveMessage.classList.add("hidden")
+        message.classList.add("hidden")
       }, 1000)
     })
+  }
+  function updateContentScriptConfig() {
+    chrome.tabs.query({}, function (tabs) {
+      console.log(tabs);
+      tabs.forEach(tab => {
+        chrome.tabs.sendMessage(tab.id, { message: "updateSettings" });
+      })
+    });
   }
   function getConfigValueFromItem(item) {
     const key = item.id;
@@ -177,7 +168,6 @@
       rightdown: COMMANDS.NONE,
       leftup: COMMANDS.NONE,
       leftdown: COMMANDS.NONE,
-
     },
     other: {
       sens: 110,

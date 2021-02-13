@@ -3,10 +3,17 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
-    font-size: 40px;
+    font-size: 20px;
     background-color: #111;
-    color: #eee;
     border: solid 2px #eee;
-    
+    padding: 5px;
+}
+
+.mouseGestureArrow {
+    color: #eee;
+    text-align: center;
+}
+#mouseGestureCommand{
+    color: #eee;
+    text-align: center;
 }
