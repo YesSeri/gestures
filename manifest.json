@@ -14,7 +14,8 @@
       "background",
       "storage",
       "scripting",
-      "bookmarks"
+      "bookmarks",
+      "search"
     ],
     "background": {
       "service_worker": "background.js"

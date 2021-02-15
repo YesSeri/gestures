@@ -136,10 +136,11 @@
         })
       },
       searchSelected: () => {
-
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
           chrome.tabs.sendMessage(tabs[0].id, { message: "getSelectedText" }, function (response) {
-            console.log(response.farewell);
+            chrome.search.query({ disposition: "NEW_TAB", text: response.selectedText }, () => {
+              console.log("search has been made");
+            })
           });
         });
 
@@ -171,16 +172,13 @@
 
     chrome.tabs.onUpdated.addListener(async () => {
       allTabs = await getAllTabs()
-      console.log('allTabs', allTabs)
     })
 
     chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-      console.log('tabId', tabId)
       for (const tab of allTabs) {
         if (tab.id === tabId) {
           console.log(tab.id, tabId);
           closedTabs.push(tab)
-          console.log('closedTabs', closedTabs)
         }
       }
     })

@@ -148,29 +148,27 @@
     NEXTTAB: "nextTab",
     NONE: "none",
     RELOAD: "reload",
+    SEARCHSELECTED: "searchSelected",
   };
 
   defaultConfig = {
     directions: {
       up: COMMANDS.CREATE,
-      down: COMMANDS.CLOSE,
+      down: COMMANDS.SEARCHSELECTED,
       left: COMMANDS.BACK,
       right: COMMANDS.FORWARD,
-      updown: COMMANDS.FORWARD,
-      downup: COMMANDS.FORWARD,
-      rightleft: COMMANDS.FORWARD,
-      leftright: COMMANDS.FORWARD,
-      downleft: COMMANDS.PREVTAB,
-      downright: COMMANDS.NEXTTAB,
-      upleft: COMMANDS.RELOAD,
+      updown: COMMANDS.DUPLICATE,
+      downup: COMMANDS.RELOAD,
+      rightleft: COMMANDS.PREVTAB,
+      leftright: COMMANDS.NEXTTAB,
+      downleft: COMMANDS.NONE,
+      downright: COMMANDS.NONE,
+      upleft: COMMANDS.NONE,
       upright: COMMANDS.NONE,
       rightup: COMMANDS.NONE,
       rightdown: COMMANDS.NONE,
       leftup: COMMANDS.NONE,
       leftdown: COMMANDS.NONE,
     },
-    other: {
-      sens: 110,
-    }
   };
 })();

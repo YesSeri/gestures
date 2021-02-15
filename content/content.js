@@ -34,21 +34,21 @@
   function getConfig() {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.get(null, function (config) {
+        console.log(config)
         resolve(config);
         // reject(defaultConfig);
       })
     })
   }
   function getSelectedText() {
-    const text = "";
     if (window.getSelection) {
-      text = window.getSelection().toString();
+      return window.getSelection().toString();
     }
-    return text;
   }
 
   async function init() {
     let config = await getConfig();
+    let selectedText = "";
     addMouseListeners()
 
     function addOverlay() {
@@ -113,9 +113,14 @@
     }
 
     function getCommand(prevDir, currentDir) {
+      console.log(prevDir, currentDir);
       if (prevDir = "none") {
-        return config.directions[currentDir]
+        const cmd = config.directions[currentDir]
+        console.log(text)
+        return cmd
       }
+        const cmd = config.directions[prevDir + currentDir]
+        console.log(text)
       return config.directions[prevDir + currentDir]
     }
 
@@ -135,11 +140,18 @@
 
       // When right mouse is released it calculates the average one or two movement directions.
       document.addEventListener("mouseup", (e) => {
+        if (e.button === 0) {
+          // Used to get marked text for search selected text.
+          if (window.getSelection) {
+            selectedText = window.getSelection().toString();
+          }
+        }
         if (e.button === 2) {
           document.oncontextmenu = function (e) {
             if (isMove) {
               stopEvent(e)
-              sendCommand(getCommand(prevDir, currentDir));
+              const cmd = getCommand(prevDir, currentDir)
+              sendCommand(cmd);
               pointArray = []
               prevDir = "none"
               currentDir = "none"
@@ -159,11 +171,20 @@
           pointArray.push(new Point(x, y))
           if (pointArray.length % 25 === 0) {
             showOverlay();
+            const tempDir = currentDir;
             currentDir = getDirection(pointArray.slice(-25))
-            if (prevDir != currentDir) {
+
+            if (tempDir == "none") {
               repaintOverlay(prevDir, currentDir)
-              prevDir = currentDir;
+            } else if (currentDir == tempDir) {
+            } else {
+              prevDir = tempDir;
+              repaintOverlay(prevDir, currentDir)
             }
+            // if (prevDir != currentDir) {
+            //   repaintOverlay(prevDir, currentDir)
+            //   prevDir = currentDir;
+            // }
             isMove = true;
           }
         }
@@ -203,10 +224,15 @@
         if (request.message === "updateSettings") {
           config = await getConfig();
         } else if (request.message === "getSelectedText") {
-          sendResponse({ response: "selectedTExtReturn" });
+          sendResponse({ selectedText: selectedText });
         }
       }
     );
   }
+  document.addEventListener("keydown", (e) => {
+    if (e.key == "z") {
+      console.log('getSelectedText()', getSelectedText())
+    }
+  })
   init()
 })();
