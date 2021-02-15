@@ -39,6 +39,13 @@
       })
     })
   }
+  function getSelectedText() {
+    const text = "";
+    if (window.getSelection) {
+      text = window.getSelection().toString();
+    }
+    return text;
+  }
 
   async function init() {
     let config = await getConfig();
@@ -195,6 +202,8 @@
       async function (request, sender, sendResponse) {
         if (request.message === "updateSettings") {
           config = await getConfig();
+        } else if (request.message === "getSelectedText") {
+          sendResponse({ response: "selectedTExtReturn" });
         }
       }
     );

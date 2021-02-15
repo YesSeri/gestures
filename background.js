@@ -16,6 +16,7 @@
     NEXTTAB: "nextTab",
     NONE: "none",
     RELOAD: "reload",
+    SEARCHSELECTED: "searchSelected",
   };
   // Gives a message on installing or updating
   chrome.runtime.onInstalled.addListener(function (details) {
@@ -31,7 +32,7 @@
   defaultConfig = {
     directions: {
       up: COMMANDS.CREATE,
-      down: COMMANDS.CLOSE,
+      down: COMMANDS.SEARCHSELECTED,
       left: COMMANDS.BACK,
       right: COMMANDS.FORWARD,
       updown: COMMANDS.DUPLICATE,
@@ -133,6 +134,15 @@
         chrome.tabs.reload(activeTab.id, () => {
           console.log("Page refreshed!")
         })
+      },
+      searchSelected: () => {
+
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, { message: "getSelectedText" }, function (response) {
+            console.log(response.farewell);
+          });
+        });
+
       }
     }
 
@@ -165,8 +175,8 @@
     })
 
     chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-      console.log('allTabs', allTabs)
-      for (const tab of allTabs){
+      console.log('tabId', tabId)
+      for (const tab of allTabs) {
         if (tab.id === tabId) {
           console.log(tab.id, tabId);
           closedTabs.push(tab)
@@ -180,7 +190,6 @@
         chrome.tabs.query({}, tabs => {
           resolve(tabs)
         })
-
       })
     }
 
