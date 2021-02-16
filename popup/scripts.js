@@ -1,4 +1,4 @@
-(function () {
+(async function () {
   function getConfig() {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.get(null, function (config) {
@@ -7,9 +7,12 @@
       })
     })
   }
+  let defaultConfig = await getDefaultConfig()
+  let config = await getConfig();
+  let commands = await getCommands();
+  let translation = await getTranslation()
 
   async function main() {
-    let config = await getConfig();
     setupSelectOptions()
     setOptionsToCurrentSettings(config.directions)
     setupButtons()
@@ -29,7 +32,7 @@
         if (item.id === setting) {
           const select = item.querySelector("select")
           const configValue = item.querySelector(`option[value=${config[setting]}]`)
-          configValue.textContent = "> " + config[setting]
+          configValue.textContent = "> " + translation[config[setting]]
           select.value = config[setting]
         }
       }
@@ -43,7 +46,7 @@
     const midRightPane = document.querySelector("#midRightPane")
     const rightPane = document.querySelector("#rightPane")
     let i = 0;
-    for (direction in defaultConfig.directions) {
+    for (direction in config.directions) {
       const newOptionsDiv = createNewOptionsDiv(optionsDivTemplate, direction)
       if (i < 4) {
         leftPane.appendChild(newOptionsDiv);
@@ -65,10 +68,10 @@
     divTemplate.classList.add("item")
     const pTag = document.createElement("p");
     const selectTab = document.createElement("select");
-    for (const command of Object.values(COMMANDS)) {
+    for (const command of Object.values(commands)) {
       const option = document.createElement("option");
       option.value = command;
-      option.innerText = command;
+      option.innerText = translation[command];
       selectTab.appendChild(option);
     }
     divTemplate.appendChild(pTag)
@@ -104,8 +107,8 @@
     saveShowMessage("saveMessage", config)
   }
 
-  function restoreDefaults() {
-    config = defaultConfig
+  async function restoreDefaults() {
+    config = await getDefaultConfig
     saveShowMessage("defaultMessage", config)
   }
   function saveShowMessage(messageId, config) {
@@ -121,7 +124,6 @@
   }
   function updateContentScriptConfig() {
     chrome.tabs.query({}, function (tabs) {
-      console.log(tabs);
       tabs.forEach(tab => {
         chrome.tabs.sendMessage(tab.id, { message: "updateSettings" });
       })
@@ -137,38 +139,29 @@
   }
   main();
 
-  const COMMANDS = {
-    BACK: "back",
-    BOOKMARK: "bookmark",
-    CLOSE: "close",
-    CREATE: "create",
-    DUPLICATE: "duplicate",
-    FORWARD: "forward",
-    PREVTAB: "prevTab",
-    NEXTTAB: "nextTab",
-    NONE: "none",
-    RELOAD: "reload",
-    SEARCHSELECTED: "searchSelected",
-  };
 
-  defaultConfig = {
-    directions: {
-      up: COMMANDS.CREATE,
-      down: COMMANDS.SEARCHSELECTED,
-      left: COMMANDS.BACK,
-      right: COMMANDS.FORWARD,
-      updown: COMMANDS.DUPLICATE,
-      downup: COMMANDS.RELOAD,
-      rightleft: COMMANDS.PREVTAB,
-      leftright: COMMANDS.NEXTTAB,
-      downleft: COMMANDS.NONE,
-      downright: COMMANDS.NONE,
-      upleft: COMMANDS.NONE,
-      upright: COMMANDS.NONE,
-      rightup: COMMANDS.NONE,
-      rightdown: COMMANDS.NONE,
-      leftup: COMMANDS.NONE,
-      leftdown: COMMANDS.NONE,
-    },
-  };
+  function getDefaultConfig() {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ message: "getDefaultConfig" }, function (response) {
+        resolve(response.defaultConfig);
+      });
+    })
+  }
+  function getTranslation() {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ message: "getTranslation" }, function (response) {
+        resolve(response.translation);
+        reject(commands);
+      });
+    })
+  }
+  function getCommands() {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ message: "getCommands" }, function (response) {
+        console.log(response);
+        resolve(response.commands);
+      });
+    })
+  }
+
 })();

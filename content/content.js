@@ -40,6 +40,15 @@
       })
     })
   }
+
+  function getTranslation() {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage({ message: "getTranslation" }, function (response) {
+        resolve(response.translation);
+      });
+    })
+  }
+
   function getSelectedText() {
     if (window.getSelection) {
       return window.getSelection().toString();
@@ -71,17 +80,19 @@
     }
 
 
-    function repaintOverlay(prevDir, currentDir) {
+    async function repaintOverlay(prevDir, currentDir) {
       const div = document.getElementById("mouseGestureOverlay")
-      const overlayHTML = getOverlayHTML(prevDir, currentDir)
+      const overlayHTML = await getOverlayHTML(prevDir, currentDir)
       div.innerHTML = overlayHTML
     }
 
-    function getOverlayHTML(prevDir, currentDir) {
+    async function getOverlayHTML(prevDir, currentDir) {
       const prevArrow = getArrow(prevDir)
       const currentArrow = getArrow(currentDir)
       const command = getCommand(prevDir, currentDir)
-      const commandHTML = `<p id="mouseGestureCommand"> ${command}</p>`
+      const translations = await getTranslation();
+      const translation = translations[command];
+      const commandHTML = `<p id="mouseGestureCommand">${translation}</p>`
       if (prevArrow != "none") {
         return `${createArrowHTML(prevArrow)}${createArrowHTML(currentArrow)}${commandHTML}`
       } else {
@@ -142,19 +153,21 @@
           }
         }
         if (e.button === 2) {
+          // When the right click menu comes up, these things are done.
           document.oncontextmenu = function (e) {
             if (isMove) {
               stopEvent(e)
+              console.log(prevDir, currentDir);
               const cmd = getCommand(prevDir, currentDir)
               sendCommand(cmd);
             };
+            pointArray = []
+            prevDir = "none"
+            currentDir = "none"
+            hideOverlay();
+            isPressed = false;
+            isMove = false;
           }
-          pointArray = []
-          isMove = false;
-          prevDir = "none"
-          currentDir = "none"
-          hideOverlay();
-          isPressed = false;
         }
       })
 
@@ -214,7 +227,7 @@
 
     // Send mouse move only if atleast the first one is a movement. 
     function sendCommand(command) {
-      chrome.runtime.sendMessage({ command });
+      chrome.runtime.sendMessage({ message: "sendCommand",command });
     }
 
     chrome.runtime.onMessage.addListener(

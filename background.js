@@ -1,10 +1,8 @@
 /*global chrome*/
 
-(function () {
+(function async() {
 
   // Names of the commands. Used like an enum, so I don't mispell things.
-
-
   const COMMANDS = {
     BACK: "back",
     BOOKMARK: "bookmark",
@@ -18,6 +16,19 @@
     RELOAD: "reload",
     SEARCHSELECTED: "searchSelected",
   };
+  const translation = {
+    back: "Back",
+    bookmark: "Bookmark",
+    close: "Close",
+    create: "Create",
+    duplicate: "Duplicate",
+    forward: "Forward",
+    prevTab: "Prev Tab",
+    nextTab: "Next Tab",
+    none: "None",
+    reload: "Refresh",
+    searchSelected: "Search Marked",
+  };
   // Gives a message on installing or updating
   chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
@@ -29,7 +40,8 @@
       console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
     }
   });
-  defaultConfig = {
+
+  const defaultConfig = {
     directions: {
       up: COMMANDS.CREATE,
       down: COMMANDS.SEARCHSELECTED,
@@ -49,6 +61,13 @@
       leftdown: COMMANDS.NONE,
     },
   };
+
+  // chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  //   console.log("response");
+  //   if (request.message === "getDefaultConfig") {
+  //     sendResponse({ defaultConfig });
+  //   }
+  // });
 
   initMain()
   function initMain() {
@@ -194,8 +213,21 @@
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // I get a string with the name of the command, and invoke the correct function in the commandFunctions object
-      const { command } = request;
-      commandFunctions[command]();
+      if (request.message === "sendCommand") {
+        const { command } = request;
+        commandFunctions[command]();
+      }
+      // The popup script requests the default config from here, so we always have one source of truth.
+      if (request.message === "getDefaultConfig") {
+        sendResponse({ defaultConfig });
+      }
+      if (request.message === "getCommands") {
+        sendResponse({ commands: COMMANDS });
+      }
+      if (request.message === "getTranslation") {
+        sendResponse({ translation });
+      }
+
     });
   }
 })();
