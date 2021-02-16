@@ -113,14 +113,9 @@
     }
 
     function getCommand(prevDir, currentDir) {
-      console.log(prevDir, currentDir);
-      if (prevDir = "none") {
-        const cmd = config.directions[currentDir]
-        console.log(text)
-        return cmd
+      if (prevDir === "none") {
+        return config.directions[currentDir]
       }
-        const cmd = config.directions[prevDir + currentDir]
-        console.log(text)
       return config.directions[prevDir + currentDir]
     }
 
@@ -141,7 +136,7 @@
       // When right mouse is released it calculates the average one or two movement directions.
       document.addEventListener("mouseup", (e) => {
         if (e.button === 0) {
-          // Used to get marked text for search selected text.
+          // Used to get marked text for search selected text. If i just get it on right click drag it won't work because right click deselects.
           if (window.getSelection) {
             selectedText = window.getSelection().toString();
           }
@@ -152,12 +147,12 @@
               stopEvent(e)
               const cmd = getCommand(prevDir, currentDir)
               sendCommand(cmd);
-              pointArray = []
-              prevDir = "none"
-              currentDir = "none"
-              isMove = false;
             };
           }
+          pointArray = []
+          isMove = false;
+          prevDir = "none"
+          currentDir = "none"
           hideOverlay();
           isPressed = false;
         }
@@ -172,12 +167,12 @@
           if (pointArray.length % 25 === 0) {
             showOverlay();
             const tempDir = currentDir;
-            currentDir = getDirection(pointArray.slice(-25))
+            const moveDirArray = getDirection(pointArray.slice(-25))
+            currentDir = averageDirection(moveDirArray)
 
             if (tempDir == "none") {
               repaintOverlay(prevDir, currentDir)
-            } else if (currentDir == tempDir) {
-            } else {
+            } else if (currentDir != tempDir) {
               prevDir = tempDir;
               repaintOverlay(prevDir, currentDir)
             }
@@ -203,11 +198,14 @@
       for (let i = 0; i < pointArray.length - 1; i++) {
         moveDirArray.push(Point.directionMoved(pointArray[i], pointArray[i + 1]))
       }
-      return averageDirection(moveDirArray);
+      return moveDirArray
     }
+
+    // Recieves an array with 25 directions and gets the most common direction and returns it. 
     function averageDirection(array) {
       let counter = {}
       array.forEach(el => {
+        // If counter[el] is undefined which is falsy, it will default to 0.
         counter[el] = (counter[el] || 0) + 1;
       });
       return Object.keys(counter).reduce((a, b) => counter[a] > counter[b] ? a : b);
@@ -221,6 +219,7 @@
 
     chrome.runtime.onMessage.addListener(
       async function (request, sender, sendResponse) {
+        // If settings get updated in popup page they need to be updated here instantly instead of when the extension restarts.
         if (request.message === "updateSettings") {
           config = await getConfig();
         } else if (request.message === "getSelectedText") {
