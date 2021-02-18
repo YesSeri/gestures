@@ -6,10 +6,11 @@ This is an extension for Google Chrome. I used a firefox extension around 2009 t
 
 ## Things to do
 
-- Finish an early version of the extension
-- Hardcode the commands you can choose from. 
-  - Later make a config file with `chrome.storage.sync.get` and `.set` 
-- Make a small menu with info about the extension in the google extension menu.
-  - Make it so you can choose custom commands from a dropdown menu here.
-- One advanced feature I want is that you should be able to move the mouse around all over, "tagging links" and then you do an open links command. That will open all the links you've tagged in new tabs.
+- Finish a prototype version of the extension - Finished
+- Hardcode the commands you can choose from. - Finished
+  - Later make a config file with `chrome.storage.sync.get` and `.set` - Finished
+- Make a small menu with info about the extension in the google extension menu. - Finished
+  - Make it so you can choose custom commands from a dropdown menu here. - Finished
+- One advanced feature I want is that you should be able to move the mouse around all over, "tagging links" and then you do an open links command. That will open all the links you've tagged in new tabs. - In progress
+- Come up with a few more commands to implement - In progress
 
