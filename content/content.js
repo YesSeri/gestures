@@ -132,7 +132,6 @@
 
     function addMouseListeners() {
       let isPressed = false;
-      let isMove = false;
       let pointArray = [];
       let prevDir = "none"
       let currentDir = "none"
@@ -172,7 +171,6 @@
           currentDir = "none"
           hideOverlay();
           isPressed = false;
-          isMove = false;
         }
       })
 
@@ -183,10 +181,10 @@
           const y = e.pageY;
 
           pointArray.push(new Point(x, y))
-          if (pointArray.length % 25 === 0) {
+          if (pointArray.length % 20 === 0) {
             showOverlay();
             const tempDir = currentDir;
-            const moveDirArray = getDirection(pointArray.slice(-25))
+            const moveDirArray = getDirection(pointArray.slice(-20))
             currentDir = averageDirection(moveDirArray)
 
             if (tempDir == "none") {
@@ -195,22 +193,10 @@
               prevDir = tempDir;
               repaintOverlay(prevDir, currentDir)
             }
-            // if (prevDir != currentDir) {
-            //   repaintOverlay(prevDir, currentDir)
-            //   prevDir = currentDir;
-            // }
-            isMove = true;
           }
         }
       });
 
-      // Stops the rightclick menu from showing up when doing mouse gesture
-      function stopEvent(event) {
-        if (event.preventDefault != undefined)
-          event.preventDefault();
-        if (event.stopPropagation != undefined)
-          event.stopPropagation();
-      }
     }
     function getDirection(pointArray) {
       let moveDirArray = []
@@ -247,10 +233,5 @@
       }
     );
   }
-  document.addEventListener("keydown", (e) => {
-    if (e.key == "z") {
-      console.log('getSelectedText()', getSelectedText())
-    }
-  })
   init()
 })();

@@ -14,6 +14,7 @@
     NEXTTAB: "nextTab",
     NONE: "none",
     RELOAD: "reload",
+    COPYURL: "copyUrl",
     SEARCHSELECTED: "searchSelected",
   };
   const translation = {
@@ -27,6 +28,7 @@
     nextTab: "Next Tab",
     none: "None",
     reload: "Refresh",
+    copyUrl: "Copy Tab Url",
     searchSelected: "Search Marked",
   };
   // Gives a message on installing or updating
@@ -43,7 +45,7 @@
 
   const defaultConfig = {
     directions: {
-      up: COMMANDS.CREATE,
+      up: COMMANDS.COPYURL,
       down: COMMANDS.SEARCHSELECTED,
       left: COMMANDS.BACK,
       right: COMMANDS.FORWARD,
@@ -123,6 +125,10 @@
         })
       },
       openClosedTab: async () => {
+
+      },
+      copyCurrentUrl: () => {
+        console.log("HEY")
 
       },
       prevTab: async () => {
