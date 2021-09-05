@@ -138,36 +138,41 @@
       let currentDir = "none"
 
       // Notices when mouse is clicked and starts taking time.
+
       document.addEventListener("mousedown", (e) => {
         if (e.button === 2) {
           isPressed = true;
         }
       })
 
+      // If you double click the contextmenu opens.
+      let rightClickTimes = 0;
+      document.addEventListener("contextmenu", function (e) {
+        if (rightClickTimes === 0) {
+          e.preventDefault();
+          setTimeout(() => rightClickTimes = 0, 200);
+          rightClickTimes++;
+        }
+      });
       // When right mouse is released it calculates the average one or two movement directions.
       document.addEventListener("mouseup", (e) => {
         if (e.button === 0) {
           // Used to get marked text for search selected text. If i just get it on right click drag it won't work because right click deselects.
-          if (window.getSelection) {
-            selectedText = window.getSelection().toString();
+          const text = window.getSelection();
+          if (text){
+            selectedText = text.toString();
           }
         }
         if (e.button === 2) {
           // When the right click menu comes up, these things are done.
-          document.oncontextmenu = function (e) {
-            if (isMove) {
-              stopEvent(e)
-              console.log(prevDir, currentDir);
-              const cmd = getCommand(prevDir, currentDir)
-              sendCommand(cmd);
-            };
-            pointArray = []
-            prevDir = "none"
-            currentDir = "none"
-            hideOverlay();
-            isPressed = false;
-            isMove = false;
-          }
+          const cmd = getCommand(prevDir, currentDir)
+          sendCommand(cmd);
+          pointArray = []
+          prevDir = "none"
+          currentDir = "none"
+          hideOverlay();
+          isPressed = false;
+          isMove = false;
         }
       })
 
@@ -176,6 +181,7 @@
         if (isPressed === true) {
           const x = e.pageX;
           const y = e.pageY;
+
           pointArray.push(new Point(x, y))
           if (pointArray.length % 25 === 0) {
             showOverlay();
@@ -227,7 +233,7 @@
 
     // Send mouse move only if atleast the first one is a movement. 
     function sendCommand(command) {
-      chrome.runtime.sendMessage({ message: "sendCommand",command });
+      chrome.runtime.sendMessage({ message: "sendCommand", command });
     }
 
     chrome.runtime.onMessage.addListener(
